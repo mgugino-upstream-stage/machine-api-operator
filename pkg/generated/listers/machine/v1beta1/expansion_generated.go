@@ -34,6 +34,14 @@ type MachineHealthCheckListerExpansion interface{}
 // MachineHealthCheckNamespaceLister.
 type MachineHealthCheckNamespaceListerExpansion interface{}
 
+// MachineReplicaSetListerExpansion allows custom methods to be added to
+// MachineReplicaSetLister.
+type MachineReplicaSetListerExpansion interface{}
+
+// MachineReplicaSetNamespaceListerExpansion allows custom methods to be added to
+// MachineReplicaSetNamespaceLister.
+type MachineReplicaSetNamespaceListerExpansion interface{}
+
 // MachineSetListerExpansion allows custom methods to be added to
 // MachineSetLister.
 type MachineSetListerExpansion interface{}

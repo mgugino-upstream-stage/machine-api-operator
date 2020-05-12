@@ -28,6 +28,8 @@ type Interface interface {
 	Machines() MachineInformer
 	// MachineHealthChecks returns a MachineHealthCheckInformer.
 	MachineHealthChecks() MachineHealthCheckInformer
+	// MachineReplicaSets returns a MachineReplicaSetInformer.
+	MachineReplicaSets() MachineReplicaSetInformer
 	// MachineSets returns a MachineSetInformer.
 	MachineSets() MachineSetInformer
 }
@@ -51,6 +53,11 @@ func (v *version) Machines() MachineInformer {
 // MachineHealthChecks returns a MachineHealthCheckInformer.
 func (v *version) MachineHealthChecks() MachineHealthCheckInformer {
 	return &machineHealthCheckInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// MachineReplicaSets returns a MachineReplicaSetInformer.
+func (v *version) MachineReplicaSets() MachineReplicaSetInformer {
+	return &machineReplicaSetInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // MachineSets returns a MachineSetInformer.

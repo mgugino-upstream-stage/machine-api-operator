@@ -36,6 +36,10 @@ func (c *FakeMachineV1beta1) MachineHealthChecks(namespace string) v1beta1.Machi
 	return &FakeMachineHealthChecks{c, namespace}
 }
 
+func (c *FakeMachineV1beta1) MachineReplicaSets(namespace string) v1beta1.MachineReplicaSetInterface {
+	return &FakeMachineReplicaSets{c, namespace}
+}
+
 func (c *FakeMachineV1beta1) MachineSets(namespace string) v1beta1.MachineSetInterface {
 	return &FakeMachineSets{c, namespace}
 }

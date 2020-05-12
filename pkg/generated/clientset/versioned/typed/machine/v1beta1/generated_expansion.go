@@ -22,4 +22,6 @@ type MachineExpansion interface{}
 
 type MachineHealthCheckExpansion interface{}
 
+type MachineReplicaSetExpansion interface{}
+
 type MachineSetExpansion interface{}

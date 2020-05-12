@@ -28,6 +28,7 @@ type MachineV1beta1Interface interface {
 	RESTClient() rest.Interface
 	MachinesGetter
 	MachineHealthChecksGetter
+	MachineReplicaSetsGetter
 	MachineSetsGetter
 }
 
@@ -42,6 +43,10 @@ func (c *MachineV1beta1Client) Machines(namespace string) MachineInterface {
 
 func (c *MachineV1beta1Client) MachineHealthChecks(namespace string) MachineHealthCheckInterface {
 	return newMachineHealthChecks(c, namespace)
+}
+
+func (c *MachineV1beta1Client) MachineReplicaSets(namespace string) MachineReplicaSetInterface {
+	return newMachineReplicaSets(c, namespace)
 }
 
 func (c *MachineV1beta1Client) MachineSets(namespace string) MachineSetInterface {
