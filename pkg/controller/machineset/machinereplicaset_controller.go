@@ -391,6 +391,7 @@ func (r *ReconcileMachineReplicaSet) createReplacementMachine(newMRS *machinev1b
 		Spec:       oldMachine.Spec,
 	}
 	machine.Namespace = oldMachine.Namespace
+	machine.Spec.ProviderID = nil
 
 	if err := r.Client.Create(context.Background(), machine); err != nil {
 		klog.Errorf("Unable to create Machine %q: %v", machine.Name, err)
