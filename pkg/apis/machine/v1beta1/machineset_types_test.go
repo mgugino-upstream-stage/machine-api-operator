@@ -63,6 +63,7 @@ func TestStorageMachineSet(t *testing.T) {
 	defer func() {
 		close(done)
 		<-stopped
+		time.Sleep(100 * time.Millisecond)
 	}()
 
 	// Test Create

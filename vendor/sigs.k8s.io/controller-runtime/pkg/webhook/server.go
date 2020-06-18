@@ -30,6 +30,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
+
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/internal/certwatcher"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/internal/metrics"
@@ -201,26 +203,29 @@ func (s *Server) Start(stop <-chan struct{}) error {
 	srv := &http.Server{
 		Handler: s.WebhookMux,
 	}
-
+	myuuid := uuid.New().String()
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		<-stop
 		log.Info("shutting down webhook server")
-
+		fmt.Printf("%v stopping webhook server %v\n", time.Now().String(), myuuid)
 		// TODO: use a context with reasonable timeout
 		if err := srv.Shutdown(context.Background()); err != nil {
 			// Error from closing listeners, or context timeout
 			log.Error(err, "error shutting down the HTTP server")
 		}
+		fmt.Printf("%v srv.Shutdown returned %v\n", time.Now().String(), myuuid)
 		close(idleConnsClosed)
 	}()
 
+	fmt.Printf("%v starting webhook server %v\n", time.Now().String(), myuuid)
 	err = srv.Serve(listener)
 	if err != nil && err != http.ErrServerClosed {
 		return err
 	}
 
 	<-idleConnsClosed
+	fmt.Printf("%v webhook server stopped %v\n", time.Now().String(), myuuid)
 	return nil
 }
 

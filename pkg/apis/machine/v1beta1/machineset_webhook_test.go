@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
+
+	// "github.com/google/uuid"
 
 	. "github.com/onsi/gomega"
 	osconfigv1 "github.com/openshift/api/config/v1"
@@ -141,6 +144,7 @@ func TestMachineSetCreation(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		stopped := make(chan struct{})
 		t.Run(tc.name, func(t *testing.T) {
 			gs := NewWithT(t)
 
@@ -166,14 +170,13 @@ func TestMachineSetCreation(t *testing.T) {
 			mgr.GetWebhookServer().Register("/validate-machine-openshift-io-v1beta1-machineset-cp-update", &webhook.Admission{Handler: createMachineSetMockHandler(true)})
 
 			done := make(chan struct{})
-			stopped := make(chan struct{})
 			go func() {
 				gs.Expect(mgr.Start(done)).To(Succeed())
 				close(stopped)
 			}()
 			defer func() {
 				close(done)
-				<-stopped
+				time.Sleep(100 * time.Millisecond)
 			}()
 
 			gs.Eventually(func() (bool, error) {
@@ -213,6 +216,7 @@ func TestMachineSetCreation(t *testing.T) {
 				gs.Expect(err).To(BeNil())
 			}
 		})
+		<-stopped
 	}
 }
 
@@ -545,6 +549,10 @@ func TestMachineSetUpdate(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+
+		fmt.Printf("%v starting test %v\n", time.Now().String(), tc.name)
+		stopped := make(chan struct{})
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			gs := NewWithT(t)
 
@@ -570,14 +578,14 @@ func TestMachineSetUpdate(t *testing.T) {
 			mgr.GetWebhookServer().Register("/validate-machine-openshift-io-v1beta1-machineset-cp-update", &webhook.Admission{Handler: createMachineSetMockHandler(true)})
 
 			done := make(chan struct{})
-			stopped := make(chan struct{})
 			go func() {
-				gs.Expect(mgr.Start(done)).To(Succeed())
+				mgr.Start(done)
+				fmt.Printf("%v mgr returned %v\n", time.Now().String(), tc.name)
 				close(stopped)
 			}()
 			defer func() {
 				close(done)
-				<-stopped
+				time.Sleep(100 * time.Millisecond)
 			}()
 
 			gs.Eventually(func() (bool, error) {
@@ -618,6 +626,8 @@ func TestMachineSetUpdate(t *testing.T) {
 				gs.Expect(err).To(BeNil())
 			}
 		})
+		<-stopped
+		fmt.Printf("%v finished test %v\n", time.Now().String(), tc.name)
 	}
 }
 
@@ -673,6 +683,8 @@ func TestCPMachineSetDelete(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc
+		stopped := make(chan struct{})
 		t.Run(tc.name, func(t *testing.T) {
 			gs := NewWithT(t)
 
@@ -689,14 +701,14 @@ func TestCPMachineSetDelete(t *testing.T) {
 			mgr.GetWebhookServer().Register("/validate-machine-openshift-io-v1beta1-machineset-cp-update", &webhook.Admission{Handler: createMachineSetMockHandler(true)})
 
 			done := make(chan struct{})
-			stopped := make(chan struct{})
+
 			go func() {
 				gs.Expect(mgr.Start(done)).To(Succeed())
 				close(stopped)
 			}()
 			defer func() {
 				close(done)
-				<-stopped
+				time.Sleep(100 * time.Millisecond)
 			}()
 
 			ms := &MachineSet{
@@ -728,6 +740,7 @@ func TestCPMachineSetDelete(t *testing.T) {
 				gs.Expect(err).To(BeNil())
 			}
 		})
+		<-stopped
 	}
 }
 
