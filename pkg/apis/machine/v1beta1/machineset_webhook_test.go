@@ -755,8 +755,8 @@ func TestCPMachineSetUpdate(t *testing.T) {
 	testCases := []struct {
 		name          string
 		expectedError string
-		originalMeta    ObjectMeta
-		updateMeta		ObjectMeta
+		originalMeta  ObjectMeta
+		updateMeta    ObjectMeta
 	}{
 		{
 			name:          "is not CP MachineSet, not becoming CP",
