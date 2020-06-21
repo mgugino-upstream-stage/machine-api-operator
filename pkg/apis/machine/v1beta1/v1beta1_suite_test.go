@@ -46,7 +46,10 @@ var (
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
+			IdleConnTimeout:   time.Duration(1 * time.Millisecond),
+			DisableKeepAlives: true,
 		},
+		Timeout: time.Duration(100 * time.Millisecond),
 	}
 )
 

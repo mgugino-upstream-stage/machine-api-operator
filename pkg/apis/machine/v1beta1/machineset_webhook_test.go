@@ -3,7 +3,9 @@ package v1beta1
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 	osconfigv1 "github.com/openshift/api/config/v1"
@@ -174,8 +176,17 @@ func TestMachineSetCreation(t *testing.T) {
 			defer func() {
 				close(done)
 				<-stopped
+				// Wait for webhook server to stop listening
+				gs.Eventually(func() (bool, error) {
+					_, err := insecureHTTPClient.Get(fmt.Sprintf("https://127.0.0.1:%d", testEnv.WebhookInstallOptions.LocalServingPort))
+					if err != nil && strings.Contains(err.Error(), "connection refused"){
+						return true, nil
+					}
+					return false, nil
+				}).Should(BeTrue())
 			}()
 
+			// Wait for webhook server to start listening
 			gs.Eventually(func() (bool, error) {
 				resp, err := insecureHTTPClient.Get(fmt.Sprintf("https://127.0.0.1:%d", testEnv.WebhookInstallOptions.LocalServingPort))
 				if err != nil {
@@ -576,17 +587,36 @@ func TestMachineSetUpdate(t *testing.T) {
 				close(stopped)
 			}()
 			defer func() {
+				fmt.Println("attempting to close done channel")
 				close(done)
 				<-stopped
+				time.Sleep(10 * time.Millisecond)
+				/*
+				fmt.Println("waiting for conn refused")
+				gs.Eventually(func() (bool, error) {
+					fmt.Println("attempting conn for stop")
+					_, err := insecureHTTPClient.Get(fmt.Sprintf("https://127.0.0.1:%d", testEnv.WebhookInstallOptions.LocalServingPort))
+					if err != nil && strings.Contains(err.Error(), "connection refused"){
+						fmt.Printf("Error found: %v\n", err.Error())
+						return true, nil
+					}
+					return false, nil
+				}).Should(BeTrue())
+				fmt.Println("conn has refused")
+				*/
 			}()
 
 			gs.Eventually(func() (bool, error) {
+				fmt.Println("attempting to wait for server startup")
 				resp, err := insecureHTTPClient.Get(fmt.Sprintf("https://127.0.0.1:%d", testEnv.WebhookInstallOptions.LocalServingPort))
 				if err != nil {
+					fmt.Printf("Waiting for start error: %v\n", err.Error())
 					return false, err
 				}
 				return resp.StatusCode == 404, nil
 			}).Should(BeTrue())
+
+			fmt.Println("after webserver start")
 
 			ms := &MachineSet{
 				ObjectMeta: metav1.ObjectMeta{
@@ -697,7 +727,22 @@ func TestCPMachineSetDelete(t *testing.T) {
 			defer func() {
 				close(done)
 				<-stopped
+				gs.Eventually(func() (bool, error) {
+					_, err := insecureHTTPClient.Get(fmt.Sprintf("https://127.0.0.1:%d", testEnv.WebhookInstallOptions.LocalServingPort))
+					if err != nil && strings.Contains(err.Error(), "connection refused"){
+						return true, nil
+					}
+					return false, nil
+				}).Should(BeTrue())
 			}()
+
+			gs.Eventually(func() (bool, error) {
+				resp, err := insecureHTTPClient.Get(fmt.Sprintf("https://127.0.0.1:%d", testEnv.WebhookInstallOptions.LocalServingPort))
+				if err != nil {
+					return false, err
+				}
+				return resp.StatusCode == 404, nil
+			}).Should(BeTrue())
 
 			ms := &MachineSet{
 				ObjectMeta: metav1.ObjectMeta{
